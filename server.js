@@ -1,19 +1,31 @@
 const server = require('net').createServer()
 
+let counter = 0
+let sockets = {}
+
 server.on('connection', socket => {
+
+    socket.id = counter++
+    sockets[socket.id] = socket
+
+    //socket.setEncoding('utf8')
+
     console.log('Client connected');
     socket.write('Welcome new client!\n')
 
-
     socket.on('data', data => {
-        console.log('data is: ', data);
-        socket.write('data is: ')
-        socket.write(data)
+        Object.entries(sockets).forEach(el => {
+            el[1].write(`${socket.id}: `)
+            el[1].write(data)
+        })
     })
 
-    socket.setEncoding('utf8')
+    socket.on('end', () => {
+        delete sockets[socket.id]
+        console.log('Client Disconnected');
+    })
 })
 
-server.listen(4000, () => {
-    console.log('server listening on 8000');
+server.listen(8888, () => {
+    console.log('server listening on 8888');
 })
